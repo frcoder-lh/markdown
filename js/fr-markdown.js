@@ -27,7 +27,9 @@ $("#doc-select").on("change", function () {
 $("#new").click(function () {
     var i = 0;
     while (isExistsInDocNames("新建文档" + (i == 0 ? "" : "(" + i + ")"))) i++;
-    var docname = prompt("请输入新文档名：", "新建文档" + (i == 0 ? "" : "(" + i + ")")).replace(/\ +/g, "");
+    var docname = prompt("请输入新文档名：", "新建文档" + (i == 0 ? "" : "(" + i + ")"));
+    if (docname == null) return;
+    docname = docname.replace(/\ +/g, "");
     if (newDoc(docname, "")) {
         addSelect(docname);
         setSelect(docname);
@@ -58,7 +60,10 @@ document.body.addEventListener("drop", function (e) {
     importFile(e.dataTransfer.files[0]);
 }, false);
 $("#export").click(function () {
-    alert("export");
+    var fileName = prompt("导出为：", nowDoc());
+    if (fileName == null) return;
+    fileName = fileName.replace(/\ +/g, "");
+    DownloadText(fileName + ".html", getOutContents());
     editor.focus();
 });
 $("#settings").click(function () {
@@ -135,6 +140,9 @@ function importFile(file) {
 function switchEncode() {
     encodeType = encodeType === "utf-8" ? "gbk" : "utf-8";
 }
+function getOutContents() {
+    return $("#out").contents().find("html").html();
+}
 
 /**
  * 生成器
@@ -176,15 +184,15 @@ function initSelete() {
 }
 
 function initDrag() {
-    //阻止浏览器默认行。
+    //阻止浏览器默认行为。
     $(document).on({
-        dragleave: function (e) {    //拖离
+        dragleave: function (e) {   //拖离
             e.preventDefault();
         },
-        drop: function (e) {  //拖后放
+        drop: function (e) {        //拖后放
             e.preventDefault();
         },
-        dragenter: function (e) {    //拖进
+        dragenter: function (e) {   //拖进
             e.preventDefault();
         },
         dragover: function (e) {    //拖来拖去
@@ -326,3 +334,44 @@ function GB2312UTF8() {
     }
 }
 
+function DownloadText(filename, content) {
+    if (document.createElement("a").download != undefined)//谷歌和火狐，使用“a”标签的download属性
+    {
+        var aLink = document.createElement('a');
+        var blob = new Blob([content]);
+        aLink.download = filename;
+        aLink.href = URL.createObjectURL(blob);
+        aLink.click();
+    }
+    else//IE
+    {
+        var Folder = BrowseFolder();
+        var fso, tf;
+        fso = new ActiveXObject("Scripting.FileSystemObject");//创建文件系统对象
+        tf = fso.CreateTextFile(Folder + filename, true);//创建一个文本文件
+        tf.write(content);//向文件中写入内容
+        tf.Close();
+    }
+}
+
+function BrowseFolder() {//使用ActiveX控件，选择保存目录
+    try {
+        var Message = "请选择保存文件夹"; //选择框提示信息
+        var Shell = new ActiveXObject("Shell.Application");
+        //var Folder = Shell.BrowseForFolder(0, Message, 0x0040, 0x11);//起始目录为：我的电脑
+        var Folder = Shell.BrowseForFolder(0, Message, 0); //起始目录为：桌面
+        if (Folder != null) {
+            Folder = Folder.items(); // 返回 FolderItems 对象
+            Folder = Folder.item(); // 返回 Folderitem 对象
+            Folder = Folder.Path; // 返回路径
+            if (Folder.charAt(Folder.length - 1) != "\\") {
+                Folder = Folder + "\\";
+            }
+            //document.all.savePath.value=Folder;
+            return Folder;
+        }
+    }
+    catch (e) {
+        alert(e.message);
+    }
+}
