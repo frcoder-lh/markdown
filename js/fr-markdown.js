@@ -4,6 +4,7 @@
  */
 var welcomeDocName = "欢迎使用";
 var welcomeDocContent = "hello world!";
+var welcomeDocUrl = "welcome.md";
 
 /**
  * 编辑器
@@ -163,7 +164,6 @@ editor.getSession().on("change", function () {
 window.onload = function () {
     initParam();
     initStore();
-    initSelete();
     initDrag();
 }
 function initParam() {
@@ -171,8 +171,22 @@ function initParam() {
 }
 function initStore() {
     if (!localStorage.docnames) {
-        newDoc(welcomeDocName, welcomeDocContent);
-        nowDoc(welcomeDocName);
+        $.ajax({
+            url: welcomeDocUrl,
+            success: function (data) {
+                newDoc(welcomeDocName, data);
+                nowDoc(welcomeDocName);
+            },
+            error: function () {
+                newDoc(welcomeDocName, welcomeDocContent);
+                nowDoc(welcomeDocName);
+            },
+            complete: function () {
+                initSelete();
+            }
+        });
+    } else {
+        initSelete();
     }
 }
 
