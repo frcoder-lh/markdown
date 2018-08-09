@@ -65,7 +65,7 @@ $("#export").click(function () {
     exportFile();
 });
 $("#settings").click(function () {
-    alert("settings");
+    setUserName();
     editor.focus();
 });
 
@@ -168,6 +168,17 @@ function switchEncode() {
 
 function getOutContents() {
     return "<!---" + editor.getValue() + "---->" + $("#out").contents().find("html").html();
+}
+
+function setUserName() {
+    var username = prompt("请输入用户名：", getUserName());
+    if (username != null) {
+        localStorage.username = username.replace(/\ +/g, "");
+    }
+}
+
+function getUserName() {
+    return localStorage.username;
 }
 
 /**
