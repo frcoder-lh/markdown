@@ -163,7 +163,7 @@ function switchEncode() {
 }
 
 function getOutContents() {
-    return $("#out").contents().find("html").html();
+    return "<!---" + editor.getValue() + "---->" + $("#out").contents().find("html").html();
 }
 
 /**
