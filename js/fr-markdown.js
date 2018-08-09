@@ -16,6 +16,7 @@ editor.setFontSize(12);
 editor.setReadOnly(false);
 editor.setOption("wrap", "free")
 editor.setShowPrintMargin(false);
+editor.$blockScrolling = Infinity
 ace.require("ace/ext/language_tools");
 
 /**
@@ -71,14 +72,17 @@ $("#settings").click(function () {
     alert("settings");
     editor.focus();
 });
+
 function setName(name) {
     return "fr-" + name;
 }
+
 function getName(name) {
     name = name.toString();
     if (name.substring(0, 3) === "fr-") return name.substring(3);
     else return null;
 }
+
 function newDoc(name, content) {
     if (!isExistsInDocNames(name)) {
         saveDoc(name, content);
@@ -89,58 +93,75 @@ function newDoc(name, content) {
     }
     else return false;
 }
+
 function saveDoc(name, content) {
     localStorage.setItem(setName(name), content);
 }
+
 function delDoc(name) {
     localStorage.removeItem(setName(name));
     var docnames = getDocNames();
     docnames.splice($.inArray(name, docnames), 1);
     localStorage.docnames = docnames;
 }
+
 function nowDoc(name) {
     if (name != null) localStorage.doc_now = name;
     return localStorage.doc_now;
 }
+
 function isExistsInDocNames(docname) {
     if (("," + localStorage.docnames + ",").indexOf(("," + docname + ",")) != -1) return true;
     else return false;
 }
+
 function getDocNames() {
     if (!localStorage.docnames) return [];
     return localStorage.docnames.toString().split(",");
 }
+
 function addSelect(name) {
     $("#doc-select").append("<option value=" + name + ">" + name + "</option>");
     $("#doc-select").val(name);
 }
+
 function setSelect(name) {
     nowDoc(name);
     $("#doc-select").val(name);
     editor.setValue(localStorage.getItem(setName(name)));
 }
+
 function delSelect(name) {
     $("#doc-select option[value='" + name + "']").remove();
 }
+
 function importFile(file) {
     if (file == undefined) return;
     var reader = new FileReader();
     reader.onload = function () {
-        console.log(this.result);
-        if (this.result.indexOf('�') != -1) {
+        var content = this.result.toString().match(/(?<=<!---)([\s\S]*)(?=---->)/im);
+        console.log(content);
+        if (content == null) {
+            content = this.result;
+        } else {
+            content = content[0]
+        }
+        if (content.indexOf('�') != -1) {
             if (confirm("文件编码错误，将进行自动修正。")) {
                 switchEncode();
                 alert("修正完毕，请重新上传！");
                 return;
             }
         }
-        editor.setValue(this.result);
+        editor.setValue(content);
     }
     reader.readAsText(file, encodeType);
 }
+
 function switchEncode() {
     encodeType = encodeType === "utf-8" ? "gbk" : "utf-8";
 }
+
 function getOutContents() {
     return $("#out").contents().find("html").html();
 }
@@ -152,6 +173,7 @@ function getOutContents() {
 function out(inString) {
     $("#out").contents().find("body").html(marked(inString));
 }
+
 editor.getSession().on("change", function () {
     out(editor.getValue());
     saveDoc(nowDoc(), editor.getValue());
@@ -166,9 +188,11 @@ window.onload = function () {
     initStore();
     initDrag();
 }
+
 function initParam() {
     encodeType = "utf-8";
 }
+
 function initStore() {
     if (!localStorage.docnames) {
         $.ajax({
