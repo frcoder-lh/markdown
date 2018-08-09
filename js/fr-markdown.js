@@ -62,11 +62,7 @@ document.body.addEventListener("drop", function (e) {
     importFile(e.dataTransfer.files[0]);
 }, false);
 $("#export").click(function () {
-    var fileName = prompt("导出为：", nowDoc());
-    if (fileName == null) return;
-    fileName = fileName.replace(/\ +/g, "");
-    DownloadText(fileName + ".html", getOutContents());
-    editor.focus();
+    exportFile();
 });
 $("#settings").click(function () {
     alert("settings");
@@ -158,6 +154,14 @@ function importFile(file) {
     reader.readAsText(file, encodeType);
 }
 
+function exportFile() {
+    var fileName = prompt("导出为：", nowDoc());
+    if (fileName == null) return;
+    fileName = fileName.replace(/\ +/g, "");
+    DownloadText(fileName + ".html", getOutContents());
+    editor.focus();
+}
+
 function switchEncode() {
     encodeType = encodeType === "utf-8" ? "gbk" : "utf-8";
 }
@@ -222,7 +226,7 @@ function initSelete() {
 }
 
 function initDrag() {
-    //阻止浏览器默认行为。
+    //阻止浏览器默认行为
     $(document).on({
         dragleave: function (e) {   //拖离
             e.preventDefault();
@@ -235,6 +239,13 @@ function initDrag() {
         },
         dragover: function (e) {    //拖来拖去
             e.preventDefault();
+        }
+    });
+    //监听Ctrl+s事件
+    $(document).keydown(function (e) {
+        if (e.ctrlKey == true && e.keyCode == 83) {
+            exportFile();
+            return false; // 返回false就不会保存网页了
         }
     });
 }
