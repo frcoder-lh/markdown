@@ -70,6 +70,9 @@ document.body.addEventListener("drop", function (e) {
 $("#save").click(function () {
     saveFile();
 });
+$("#import").click(function () {
+    importPublishedFile();
+});
 $("#publish").click(function () {
     publishFile();
 });
@@ -154,12 +157,9 @@ function openFile(file) {
     if (file == undefined) return;
     var reader = new FileReader();
     reader.onload = function () {
-        var content = this.result.toString().match(/(?<=<!---)([\s\S]*)(?=---->)/im);
-        console.log(content);
+        var content = getRealContent(this.result.toString());
         if (content == null) {
             content = this.result;
-        } else {
-            content = content[0]
         }
         if (content.indexOf('�') != -1) {
             if (confirm("文件编码错误，将进行自动修正。")) {
@@ -168,7 +168,9 @@ function openFile(file) {
                 return;
             }
         }
-        editor.setValue(content);
+        if ($.trim(editor.getValue()) == '' || confirm("确认导入文档？当前内容将被覆盖!") == true) {
+            editor.setValue(content);
+        }
     }
     reader.readAsText(file, encodeType);
 }
@@ -179,6 +181,43 @@ function saveFile() {
     fileName = fileName.replace(/\ +/g, "");
     DownloadText(fileName + ".html", getOutContents());
     editor.focus();
+}
+
+function getRealContent(content) {
+    var res = content.toString().match(/(?<=<!---)([\s\S]*)(?=---->)/im);
+    if (res != null) return res[0]
+    return null;
+}
+
+function setRealContent(realContent, content) {
+    return "<!---" + realContent + "---->" + content;
+}
+
+function importPublishedFile(success, fail) {
+    var url = prompt("文档地址：");
+    if (url == null) return;
+    url = decodeURI(url.replace(/\ +/g, ""));
+    if (!url.endsWith(".html")) url += ".html";
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function (data) {
+            var content = getRealContent(data);
+            if (content == null) {
+                content = data;
+            }
+            if ($.trim(editor.getValue()) == '' || confirm("确认导入文档？当前内容将被覆盖!") == true) {
+                editor.setValue(content);
+                editor.focus();
+                $("#publishUrl").text(url).attr("href", url);
+                setDocUrl(nowDoc(), url);
+            }
+        },
+        error: function () {
+            alert("地址不存在！");
+        }
+    });
+
 }
 
 function publishFile(success, fail) {
@@ -206,7 +245,7 @@ function switchEncode() {
 }
 
 function getOutContents() {
-    return "<!---" + editor.getValue() + "---->" + $("#out").contents().find("html").html();
+    return setRealContent(editor.getValue(), $("#out").contents().find("html").html());
 }
 
 function setUserName() {
