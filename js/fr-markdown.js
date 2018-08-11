@@ -193,7 +193,7 @@ function getRealContent(content) {
 }
 
 function setRealContent(realContent, content) {
-    return "<!---" + realContent + "---->" + content;
+    return "<!---" + realContent + "---->\n" + content;
 }
 
 function importPublishedFile() {
@@ -224,21 +224,42 @@ function importPublishedFile() {
 }
 
 function publishFile() {
-    var fileName = prompt("发布为：", nowDoc());
-    if (fileName == null) return;
-    fileName = fileName.replace(/\ +/g, "");
     if ($.trim(getUserName()) == '') setUserName();
     if ($.trim(getUserName()) != '') {
+        var fileName = prompt("发布为：", nowDoc());
+        if (fileName == null) return;
+        fileName = fileName.replace(/\ +/g, "");
         var path = getUserName() + "/" + fileName;
-        githubSaveFile(githubUrl + path + ".html", getOutContents(),
-            function (data) {
-                alert("发布成功！");
-                var url = publishBaseUrl + path;
-                $("#publishUrl").text(url).attr("href", url);
-                setDocUrl(fileName, url);
-            }, function (data, e) {
-                alert("发布失败！");
-            });
+        var content = getOutContents();
+        var password = prompt("创建文档密码：");
+        if (password == null) {
+            githubSaveFile(githubUrl + path + ".html", content,
+                function () {
+                    alert("发布成功！");
+                    var url = publishBaseUrl + path;
+                    $("#publishUrl").text(url).attr("href", url);
+                    setDocUrl(fileName, url);
+                }, function () {
+                    alert("发布失败！");
+                });
+        } else {
+            appendPassWord(password,
+                function (content) {
+                    githubSaveFile(githubUrl + path + ".html", content,
+                        function () {
+                            alert("发布成功！");
+                            var url = publishBaseUrl + path;
+                            $("#publishUrl").text(url).attr("href", url);
+                            setDocUrl(fileName, url);
+                        }, function () {
+                            alert("发布失败！");
+                        });
+                }, function () {
+                    alert("文档加密失败！");
+                });
+        }
+
+
     }
     editor.focus();
 }
@@ -250,14 +271,29 @@ function updatePublishedFile() {
         return;
     }
     url = githubUrl + url.slice(publishBaseUrl.length)
-    githubUpdateFile(url, getOutContents(),
-        function () {
-            alert("更新成功！");
-        },
-        function () {
-            alert("更新失败，请稍后重试！");
-        }
-    );
+    var content = getOutContents();
+    var password = prompt("创建文档密码：");
+    if (password == null) {
+        githubUpdateFile(url, content,
+            function () {
+                alert("更新成功！");
+            }, function () {
+                alert("更新失败，请稍后重试！");
+            });
+    } else {
+        appendPassWord(password,
+            function (content) {
+                githubUpdateFile(url, content,
+                    function () {
+                        alert("更新成功！");
+                    }, function () {
+                        alert("更新失败，请稍后重试！");
+                    });
+            }, function () {
+                alert("文档加密失败！");
+            });
+    }
+
 }
 
 function switchEncode() {
@@ -267,6 +303,45 @@ function switchEncode() {
 function getOutContents() {
     return setRealContent(editor.getValue(), $("#out").contents().find("html").html());
 }
+
+function appendPassWord(password, success, fail) {
+    var times = 0, files = ["out.html", "js/fr-password.js", "css/fr-password.css"], datas = {};
+    files.forEach(function (file) {
+        $.ajax({
+            type: "GET",
+            url: file,
+            success: function (data) {
+                datas[file] = data;
+                trigger();
+            },
+            error: function () {
+                trigger();
+            }
+        });
+    });
+
+    function trigger() {
+        times++;
+        if (times === files.length) {
+            if (datas["out.html"] == undefined || datas["css/fr-password.css"] == undefined || datas["js/fr-password.js"] == undefined) {
+                fail()
+            } else {
+                complete();
+            }
+        }
+    }
+
+    function complete() {
+        var content = datas["out.html"];
+        content = content.replace("<!---css/fr-markdown.css---->", '<style type="text/css">' + datas["css/fr-password.css"] + '</style>');
+        content = content.replace("<!---js/fr-password.js---->", '<script language="javascript">' + datas["js/fr-password.js"] + '</script>');
+        content = content.replace("@password@", password);
+        content = content.replace("@content@", $("#out").contents().find("body").html());
+        content = setRealContent(editor.getValue(), content);
+        success(content)
+    }
+}
+
 
 function setUserName() {
     var username = prompt("请输入用户名：", localStorage.username);
