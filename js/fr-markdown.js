@@ -232,7 +232,7 @@ function publishFile() {
         var path = getUserName() + "/" + fileName;
         var content = getOutContents();
         var password = prompt("创建文档密码：");
-        if (password == null) {
+        if ($.trim(password) == '') {
             githubSaveFile(githubUrl + path + ".html", content,
                 function () {
                     alert("发布成功！");
@@ -271,9 +271,10 @@ function updatePublishedFile() {
         return;
     }
     url = githubUrl + url.slice(publishBaseUrl.length)
+    if (!url.endsWith(".html")) url += ".html";
     var content = getOutContents();
     var password = prompt("创建文档密码：");
-    if (password == null) {
+    if ($.trim(password) == '') {
         githubUpdateFile(url, content,
             function () {
                 alert("更新成功！");
