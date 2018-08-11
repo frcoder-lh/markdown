@@ -17,7 +17,7 @@ var content = function () {
 
 window.onload = function () {
     if (location.protocol.startsWith("http")) {
-        document.body.innerHTML = '<div id="background"><div id="container"><input id="pass" type="password" placeholder="请输入文档密码..." onkeypress=\'enterPress(event)\' onkeydown=\'enterPress()\'/><button id="submit" type="button">确认</button></div></div>';
+        document.body.innerHTML = '<div id="background"><div id="container"><input id="pass" type="password" placeholder="请输入文档密码..." onkeypress=\'enterPress(event)\' onkeydown=\'enterPress()\' autofocus="autofocus"/><button id="submit" type="button">确认</button></div></div>';
     } else {
         document.body.innerHTML = content.getMutilines();
     }
