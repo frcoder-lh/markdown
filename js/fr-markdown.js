@@ -5,6 +5,12 @@
 var welcomeDocName = "欢迎使用";
 var welcomeDocContent = "hello world!";
 var welcomeDocUrl = "welcome.md";
+var publishBaseUrl = window.location.host;
+var publishBaseUrl = "https://little-tools.github.io/test/";
+
+var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var githubUrl = "https://api.github.com/repos/little-tools/test/contents/";
+var githubToken = "5d919c50cc2b167d610e181b20ea5d6b23d4174d";
 
 /**
  * 编辑器
@@ -64,6 +70,9 @@ document.body.addEventListener("drop", function (e) {
 $("#export").click(function () {
     exportFile();
 });
+$("#publish").click(function () {
+    publishFile();
+});
 $("#settings").click(function () {
     setUserName();
     editor.focus();
@@ -116,6 +125,14 @@ function getDocNames() {
     return localStorage.docnames.toString().split(",");
 }
 
+function setDocUrl(name, url) {
+    localStorage.setItem(setName(name) + "-url", url);
+}
+
+function getDocUrl(name) {
+    return localStorage.getItem(setName(name) + "-url");
+}
+
 function addSelect(name) {
     $("#doc-select").append("<option value=" + name + ">" + name + "</option>");
     $("#doc-select").val(name);
@@ -125,6 +142,7 @@ function setSelect(name) {
     nowDoc(name);
     $("#doc-select").val(name);
     editor.setValue(localStorage.getItem(setName(name)));
+    $("#publishUrl").text(getDocUrl(name)).attr("href", getDocUrl(name));
 }
 
 function delSelect(name) {
@@ -162,6 +180,26 @@ function exportFile() {
     editor.focus();
 }
 
+function publishFile(success, fail) {
+    var fileName = prompt("发布为：", nowDoc());
+    if (fileName == null) return;
+    fileName = fileName.replace(/\ +/g, "");
+    if ($.trim(getUserName()) == '') setUserName();
+    if ($.trim(getUserName()) != '') {
+        var path = getUserName() + "/" + fileName;
+        githubSave(path + ".html", getOutContents(),
+            function (data) {
+                alert("发布成功！");
+                var url = publishBaseUrl + path;
+                $("#publishUrl").text(url).attr("href", url);
+                setDocUrl(fileName, url);
+            }, function (data, e) {
+                alert("发布失败！");
+            });
+    }
+    editor.focus();
+}
+
 function switchEncode() {
     encodeType = encodeType === "utf-8" ? "gbk" : "utf-8";
 }
@@ -171,14 +209,33 @@ function getOutContents() {
 }
 
 function setUserName() {
-    var username = prompt("请输入用户名：", getUserName());
-    if (username != null) {
+    var username = prompt("请输入用户名：", localStorage.username);
+    if ($.trim(username) != '') {
         localStorage.username = username.replace(/\ +/g, "");
     }
 }
 
 function getUserName() {
     return localStorage.username;
+}
+
+function githubSave(name, content, success, fail) {
+    $.ajax({
+        type: "PUT",
+        url: githubUrl + name,
+        headers: {
+            "Authorization": "token " + githubToken
+        },
+        data: JSON.stringify({
+            "branch": "master",
+            "message": "add files",
+            "content": Base64Encode(content)
+        }),
+        dataType: 'json',
+        ContentType: "application/json",
+        success: success,
+        error: fail
+    });
 }
 
 /**
@@ -435,3 +492,102 @@ function BrowseFolder() {//使用ActiveX控件，选择保存目录
         alert(e.message);
     }
 }
+
+function Base64Encode(input) {
+    var output = "";
+    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+    var i = 0;
+    input = _utf8_encode(input);
+    while (i < input.length) {
+        chr1 = input.charCodeAt(i++);
+        chr2 = input.charCodeAt(i++);
+        chr3 = input.charCodeAt(i++);
+        enc1 = chr1 >> 2;
+        enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+        enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+        enc4 = chr3 & 63;
+        if (isNaN(chr2)) {
+            enc3 = enc4 = 64;
+        } else if (isNaN(chr3)) {
+            enc4 = 64;
+        }
+        output = output +
+            keyStr.charAt(enc1) + keyStr.charAt(enc2) +
+            keyStr.charAt(enc3) + keyStr.charAt(enc4);
+    }
+    return output;
+}
+
+// public method for decoding
+function Base64Decode(input) {
+    var output = "";
+    var chr1, chr2, chr3;
+    var enc1, enc2, enc3, enc4;
+    var i = 0;
+    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    while (i < input.length) {
+        enc1 = keyStr.indexOf(input.charAt(i++));
+        enc2 = keyStr.indexOf(input.charAt(i++));
+        enc3 = keyStr.indexOf(input.charAt(i++));
+        enc4 = keyStr.indexOf(input.charAt(i++));
+        chr1 = (enc1 << 2) | (enc2 >> 4);
+        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+        chr3 = ((enc3 & 3) << 6) | enc4;
+        output = output + String.fromCharCode(chr1);
+        if (enc3 != 64) {
+            output = output + String.fromCharCode(chr2);
+        }
+        if (enc4 != 64) {
+            output = output + String.fromCharCode(chr3);
+        }
+    }
+    output = _utf8_decode(output);
+    return output;
+}
+
+// private method for UTF-8 encoding
+function _utf8_encode(string) {
+    string = string.replace(/\r\n/g, "\n");
+    var utftext = "";
+    for (var n = 0; n < string.length; n++) {
+        var c = string.charCodeAt(n);
+        if (c < 128) {
+            utftext += String.fromCharCode(c);
+        } else if ((c > 127) && (c < 2048)) {
+            utftext += String.fromCharCode((c >> 6) | 192);
+            utftext += String.fromCharCode((c & 63) | 128);
+        } else {
+            utftext += String.fromCharCode((c >> 12) | 224);
+            utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+            utftext += String.fromCharCode((c & 63) | 128);
+        }
+
+    }
+    return utftext;
+}
+
+// private method for UTF-8 decoding
+function _utf8_decode(utftext) {
+    var string = "";
+    var i = 0;
+    var c = c1 = c2 = 0;
+    while (i < utftext.length) {
+        c = utftext.charCodeAt(i);
+        if (c < 128) {
+            string += String.fromCharCode(c);
+            i++;
+        } else if ((c > 191) && (c < 224)) {
+            c2 = utftext.charCodeAt(i + 1);
+            string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+            i += 2;
+        } else {
+            c2 = utftext.charCodeAt(i + 1);
+            c3 = utftext.charCodeAt(i + 2);
+            string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+            i += 3;
+        }
+    }
+    return string;
+}
+
+

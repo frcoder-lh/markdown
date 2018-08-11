@@ -10,6 +10,7 @@ body {
     margin: 0;
     padding: 0;
     border-width: 0;
+    min-width: 700px;
 }
 
 #container {
@@ -78,6 +79,19 @@ body {
     color: #dbdbdb;
 }
 
+#bar a {
+    color: #dbdbdb;
+    text-decoration: none;
+    font-size: 14px;
+    font-family: "Courier New", 华文楷体;
+    line-height: 1.8;
+    margin-left: 10px;
+}
+
+#bar a:hover {
+    color: #ffffff;
+}
+
 #tools {
     list-style: none;
     padding: 0px;
@@ -92,6 +106,6 @@ body {
     cursor: default;
 }
 
-#tools li:hover{
+#tools li:hover {
     color: #ffffff;
 }
