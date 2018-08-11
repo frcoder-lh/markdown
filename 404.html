@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>文档正在发布中……</title>
+    <title>正在打开文档……</title>
     <base target="_blank"/>
     <style type="text/css">
         body {
@@ -43,7 +43,12 @@
         }
 
         setTimeout(function () {
-            window.location.reload();
+            var location = window.location.toString()
+            if (location.endsWith(".html")) {
+                window.location = location.slice(0, location.length - 5);
+            } else {
+                window.location = location + ".html";
+            }
         }, 2000);
         placeholderPic();
         window.onresize = function () {
@@ -53,7 +58,7 @@
 </head>
 <body>
 <div class="loading" style="padding-top:50px">
-    文档正在发布中……
+    正在打开文档……
 </div>
 </body>
 </html>
