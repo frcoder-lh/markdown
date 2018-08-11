@@ -56,19 +56,19 @@ $("#delete").click(function () {
     }
     editor.focus();
 });
-$("#import").click(function () {
-    $("#importFile").click();
-    $("#importFile").on("change", function () {
-        importFile(document.getElementById("importFile").files[0]);
+$("#open").click(function () {
+    $("#openFile").click();
+    $("#openFile").on("change", function () {
+        openFile(document.getElementById("openFile").files[0]);
     });
     editor.focus();
 });
 document.body.addEventListener("drop", function (e) {
     e.preventDefault();
-    importFile(e.dataTransfer.files[0]);
+    openFile(e.dataTransfer.files[0]);
 }, false);
-$("#export").click(function () {
-    exportFile();
+$("#save").click(function () {
+    saveFile();
 });
 $("#publish").click(function () {
     publishFile();
@@ -150,7 +150,7 @@ function delSelect(name) {
     $("#doc-select option[value='" + name + "']").remove();
 }
 
-function importFile(file) {
+function openFile(file) {
     if (file == undefined) return;
     var reader = new FileReader();
     reader.onload = function () {
@@ -173,8 +173,8 @@ function importFile(file) {
     reader.readAsText(file, encodeType);
 }
 
-function exportFile() {
-    var fileName = prompt("导出为：", nowDoc());
+function saveFile() {
+    var fileName = prompt("保存为：", nowDoc());
     if (fileName == null) return;
     fileName = fileName.replace(/\ +/g, "");
     DownloadText(fileName + ".html", getOutContents());
@@ -313,7 +313,7 @@ function initDrag() {
     //监听Ctrl+s事件
     $(document).keydown(function (e) {
         if (e.ctrlKey == true && e.keyCode == 83) {
-            exportFile();
+            saveFile();
             return false; // 返回false就不会保存网页了
         }
     });
