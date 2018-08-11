@@ -359,6 +359,9 @@ function githubGetFileInfo(url, success, fail) {
     $.ajax({
         type: "GET",
         url: url,
+        data: {
+            "ref": gitBranch
+        },
         success: success,
         error: fail
     });
