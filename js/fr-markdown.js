@@ -5,12 +5,12 @@
 var welcomeDocName = "欢迎使用";
 var welcomeDocContent = "hello world!";
 var welcomeDocUrl = "welcome.md";
-var publishBaseUrl = window.location.host;
-var publishBaseUrl = "https://little-tools.github.io/test/";
+var publishBaseUrl = "http://book.littletools.ml/";
 
 var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-var githubUrl = "https://api.github.com/repos/little-tools/test/contents/";
-var githubToken = "5d919c50cc2b167d610e181b20ea5d6b23d4174d";
+var githubUrl = "https://api.github.com/repos/little-tools/md/contents/";
+var githubToken = "f0303a6dad79cd1bd5e57d59d17fc8291a8c19cb";
+var gitBranch = "gh-pages";
 
 /**
  * 编辑器
@@ -371,8 +371,8 @@ function githubSaveFile(url, content, success, fail) {
             "Authorization": "token " + githubToken
         },
         data: JSON.stringify({
-            "branch": "master",
-            "message": "add files",
+            "branch": gitBranch,
+            "message": "save",
             "content": Base64Encode(content)
         }),
         dataType: 'json',
@@ -391,8 +391,8 @@ function githubUpdateFile(url, content, success, fail) {
                 "Authorization": "token " + githubToken
             },
             data: JSON.stringify({
-                "branch": "master",
-                "message": "add files",
+                "branch": gitBranch,
+                "message": "update",
                 "sha": data.sha,
                 "content": Base64Encode(content)
             }),
