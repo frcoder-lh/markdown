@@ -76,6 +76,9 @@ $("#import").click(function () {
 $("#publish").click(function () {
     publishFile();
 });
+$("#update").click(function () {
+    updatePublishedFile();
+});
 $("#settings").click(function () {
     setUserName();
     editor.focus();
@@ -193,7 +196,7 @@ function setRealContent(realContent, content) {
     return "<!---" + realContent + "---->" + content;
 }
 
-function importPublishedFile(success, fail) {
+function importPublishedFile() {
     var url = prompt("文档地址：");
     if (url == null) return;
     url = decodeURI(url.replace(/\ +/g, ""));
@@ -220,14 +223,14 @@ function importPublishedFile(success, fail) {
 
 }
 
-function publishFile(success, fail) {
+function publishFile() {
     var fileName = prompt("发布为：", nowDoc());
     if (fileName == null) return;
     fileName = fileName.replace(/\ +/g, "");
     if ($.trim(getUserName()) == '') setUserName();
     if ($.trim(getUserName()) != '') {
         var path = getUserName() + "/" + fileName;
-        githubSave(path + ".html", getOutContents(),
+        githubSaveFile(githubUrl + path + ".html", getOutContents(),
             function (data) {
                 alert("发布成功！");
                 var url = publishBaseUrl + path;
@@ -238,6 +241,23 @@ function publishFile(success, fail) {
             });
     }
     editor.focus();
+}
+
+function updatePublishedFile() {
+    var url = getDocUrl(nowDoc());
+    if (!url) {
+        alert("请先发布文档！");
+        return;
+    }
+    url = githubUrl + url.slice(publishBaseUrl.length)
+    githubUpdateFile(url, getOutContents(),
+        function () {
+            alert("更新成功！");
+        },
+        function () {
+            alert("更新失败，请稍后重试！");
+        }
+    );
 }
 
 function switchEncode() {
@@ -259,10 +279,19 @@ function getUserName() {
     return localStorage.username;
 }
 
-function githubSave(name, content, success, fail) {
+function githubGetFileInfo(url, success, fail) {
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: success,
+        error: fail
+    });
+}
+
+function githubSaveFile(url, content, success, fail) {
     $.ajax({
         type: "PUT",
-        url: githubUrl + name,
+        url: url,
         headers: {
             "Authorization": "token " + githubToken
         },
@@ -276,6 +305,31 @@ function githubSave(name, content, success, fail) {
         success: success,
         error: fail
     });
+}
+
+function githubUpdateFile(url, content, success, fail) {
+    githubGetFileInfo(url, function (data) {
+        $.ajax({
+            type: "PUT",
+            url: url,
+            headers: {
+                "Authorization": "token " + githubToken
+            },
+            data: JSON.stringify({
+                "branch": "master",
+                "message": "add files",
+                "sha": data.sha,
+                "content": Base64Encode(content)
+            }),
+            dataType: 'json',
+            ContentType: "application/json",
+            success: success,
+            error: fail
+        });
+    }, function () {
+        alert("更新失败：文件不存在，请重新发布！");
+    })
+
 }
 
 /**
