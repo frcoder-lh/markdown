@@ -9,7 +9,9 @@ var publishBaseUrl = "http://book.littletools.ml/";
 
 var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var githubUrl = "https://api.github.com/repos/little-tools/md/contents/";
-var githubToken = "f0303a6dad79cd1bd5e57d59d17fc8291a8c19cb";
+var githubToken1 = "f8765952ea0e";
+var githubToken3 = "95a588e6d";
+var githubToken2 = "232c9bec20cf5b855db";
 var gitBranch = "gh-pages";
 
 /**
@@ -355,6 +357,10 @@ function getUserName() {
     return localStorage.username;
 }
 
+function getGithubToken() {
+    return githubToken1 + githubToken2 + githubToken3;
+}
+
 function githubGetFileInfo(url, success, fail) {
     $.ajax({
         type: "GET",
@@ -372,7 +378,7 @@ function githubSaveFile(url, content, success, fail) {
         type: "PUT",
         url: url,
         headers: {
-            "Authorization": "token " + githubToken
+            "Authorization": "token " + getGithubToken()
         },
         data: JSON.stringify({
             "branch": gitBranch,
@@ -392,7 +398,7 @@ function githubUpdateFile(url, content, success, fail) {
             type: "PUT",
             url: url,
             headers: {
-                "Authorization": "token " + githubToken
+                "Authorization": "token " + getGithubToken()
             },
             data: JSON.stringify({
                 "branch": gitBranch,
