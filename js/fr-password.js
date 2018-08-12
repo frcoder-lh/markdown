@@ -3,15 +3,13 @@ var enterPressFlag = null;
 
 Function.prototype.getMutilines = function () {
     var content = new String(this);
-    var start = content.indexOf('/*') + 3;
+    var start = content.indexOf('/*') + 2;
     var stop = content.lastIndexOf('*/');
     return content.substring(start, stop);
 };
 
 var content = function () {
-    /*
-    @content@
-    */
+    /*@content@*/
 };
 
 
