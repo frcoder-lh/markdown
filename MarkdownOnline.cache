@@ -1,11 +1,13 @@
 CACHE MANIFEST
-#version 0.1.1
+#version 0.2
 
 CACHE:
     index.html
     out.html
     css/fr-markdown.css
+    css/fr-password.css
     js/fr-markdown.js
+    js/fr-password.js
     js/ace.js
     js/ext-language_tools.js
     js/jquery-3.2.0.min.js
