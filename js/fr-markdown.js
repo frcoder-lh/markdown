@@ -113,7 +113,7 @@ function saveDoc(name, content) {
 
 function delDoc(name) {
     localStorage.removeItem(setName(name));
-    localStorage.removeItem(getDocUrl(name));
+    localStorage.removeItem(setName(name) + "-url");
     var docnames = getDocNames();
     docnames.splice($.inArray(name, docnames), 1);
     localStorage.docnames = docnames;
