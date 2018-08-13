@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <base target="_blank"/>
-    <!---css/fr-markdown.css---->
+    <!---css/fr-password.css---->
     <!---js/fr-password.js---->
     <style type="text/css">
         * {
@@ -179,7 +179,10 @@
         }
 
     </style>
-    <script>console.log("Welcome to contact %o for any further question.", "frcoder.lh@hotmail.com");</script>
+    <script>
+        document.title = decodeURI(location.pathname.slice(location.pathname.lastIndexOf('/') + 1, location.pathname.lastIndexOf('.html') == -1 ? undefined : location.pathname.lastIndexOf('.html')));
+        console.log('\n\n\n\nWelcome to contact >>> frcoder.lh@hotmail.com <<< for any further question.\n\n\n\n\n');
+    </script>
 </head>
 <body>
 

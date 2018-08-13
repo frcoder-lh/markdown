@@ -333,7 +333,7 @@ function appendPassWord(password, success, fail) {
 
     function complete() {
         var content = datas["out.html"];
-        content = content.replace("<!---css/fr-markdown.css---->", '<style type="text/css">' + datas["css/fr-password.css"] + '</style>');
+        content = content.replace("<!---css/fr-password.css---->", '<style type="text/css">' + datas["css/fr-password.css"] + '</style>');
         content = content.replace("<!---js/fr-password.js---->", '<script language="javascript">' + datas["js/fr-password.js"] + '</script>');
         content = content.replace("@password@", password);
         content = content.replace("@content@", $("#out").contents().find("body").html());
