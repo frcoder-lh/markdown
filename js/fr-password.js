@@ -12,8 +12,18 @@ var content = function () {
     /*@content@*/
 };
 
+function initIE() {
+    String.prototype.startsWith = String.prototype.startsWith || function (str) {
+        var reg = new RegExp("^" + str);
+        return reg.test(this);
+    }
+    String.prototype.endsWith = String.prototype.endsWith || function (str) {
+        var reg = new RegExp(str + "$");
+        return reg.test(this);
+    }
+}
 
-window.onload = function () {
+function buildBody() {
     if (location.protocol.startsWith("http")) {
         document.body.innerHTML = '<div id="background"><div id="container"><input id="pass" type="password" placeholder="请输入文档密码..." onkeypress=\'enterPress(event)\' onkeydown=\'enterPress()\' autofocus="autofocus"/><button id="submit" type="button">确认</button></div></div>';
     } else {
@@ -42,4 +52,9 @@ function checkPwd() {
         pass.value = "";
         pass.focus();
     }
+}
+
+window.onload = function () {
+    initIE();
+    buildBody();
 }

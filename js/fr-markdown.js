@@ -60,9 +60,6 @@ $("#delete").click(function () {
 });
 $("#open").click(function () {
     $("#openFile").click();
-    $("#openFile").on("change", function () {
-        openFile(document.getElementById("openFile").files[0]);
-    });
     editor.focus();
 });
 document.body.addEventListener("drop", function (e) {
@@ -189,8 +186,8 @@ function saveFile() {
 }
 
 function getRealContent(content) {
-    var res = content.toString().match(/(?<=<!---)([\s\S]*)(?=---->)/im);
-    if (res != null) return res[0]
+    var res = content.toString().match(/<!---([\s\S]*)---->/im);
+    if (res != null) return res[0].slice(5, -5);
     return null;
 }
 
@@ -435,9 +432,25 @@ editor.getSession().on("change", function () {
  *
  */
 window.onload = function () {
+    initIE();
     initParam();
     initStore();
+    initBind();
     initDrag();
+}
+
+/**
+ * 处理ie的兼容性问题
+ */
+function initIE() {
+    String.prototype.startsWith = String.prototype.startsWith || function (str) {
+        var reg = new RegExp("^" + str);
+        return reg.test(this);
+    }
+    String.prototype.endsWith = String.prototype.endsWith || function (str) {
+        var reg = new RegExp(str + "$");
+        return reg.test(this);
+    }
 }
 
 function initParam() {
@@ -470,6 +483,12 @@ function initSelete() {
         if (v != null) $("#doc-select").append("<option value=" + v + ">" + v + "</option>");
     })
     setSelect(nowDoc());
+}
+
+function initBind() {
+    $("#openFile").on("change", function () {
+        openFile(document.getElementById("openFile").files[0]);
+    });
 }
 
 function initDrag() {
