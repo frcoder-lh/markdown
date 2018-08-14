@@ -199,10 +199,9 @@ function importPublishedFile() {
     var url = prompt("文档地址：");
     if (url == null) return;
     url = decodeURI(url.replace(/\ +/g, ""));
-    if (!url.endsWith(".html")) url += ".html";
     $.ajax({
         type: "GET",
-        url: url,
+        url: url.endsWith(".html") ? url : url + ".html",
         success: function (data) {
             var content = getRealContent(data);
             if (content == null) {
