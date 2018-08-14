@@ -1,5 +1,5 @@
 CACHE MANIFEST
-#version 0.2.2
+#version 0.2.3
 
 CACHE:
     index.html
@@ -12,6 +12,7 @@ CACHE:
     js/ext-language_tools.js
     js/jquery-3.2.0.min.js
     js/marked.min.js
+    js/clipboard.min.js
 
 NETWORK:
     *

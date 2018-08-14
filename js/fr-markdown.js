@@ -488,6 +488,20 @@ function initBind() {
     $("#openFile").on("change", function () {
         openFile(document.getElementById("openFile").files[0]);
     });
+
+    new ClipboardJS('#copyPublishUrl', {
+        text: function () {
+            return $("#publishUrl").text();
+        }
+    });
+    $("#publishUrl").bind("contextmenu", function (e) {
+        return false;
+    }).mousedown(function (e) {
+        if (3 == e.which) {
+            $('#copyPublishUrl').click();
+            alert('地址已复制到剪切板！');
+        }
+    });
 }
 
 function initDrag() {
