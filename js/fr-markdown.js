@@ -230,6 +230,7 @@ function publishFile() {
         var path = getUserName() + "/" + fileName;
         var content = getOutContents();
         var password = prompt("创建文档密码：");
+        if (password == null) return;
         if ($.trim(password) == '') {
             githubSaveFile(githubUrl + path + ".html", content,
                 function () {
@@ -256,8 +257,6 @@ function publishFile() {
                     alert("文档加密失败！");
                 });
         }
-
-
     }
     editor.focus();
 }
@@ -272,6 +271,7 @@ function updatePublishedFile() {
     if (!url.endsWith(".html")) url += ".html";
     var content = getOutContents();
     var password = prompt("创建文档密码：");
+    if (password == null) return;
     if ($.trim(password) == '') {
         githubUpdateFile(url, content,
             function () {
@@ -292,7 +292,6 @@ function updatePublishedFile() {
                 alert("文档加密失败！");
             });
     }
-
 }
 
 function switchEncode() {
