@@ -186,7 +186,7 @@ function saveFile() {
 }
 
 function getRealContent(content) {
-    var res = content.toString().match(/<!---([\s\S]*)---->/im);
+    var res = content.toString().match(/<!---([\s\S]*?)---->/im);
     if (res != null) return res[0].slice(5, -5);
     return null;
 }
