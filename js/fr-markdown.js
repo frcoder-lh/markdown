@@ -195,13 +195,19 @@ function setRealContent(realContent, content) {
     return "<!---" + realContent + "---->\n" + content;
 }
 
+function getRealUrl(url) {
+    var realUrl = url.endsWith(".html") ? url : url + ".html";
+    realUrl = "http" + realUrl.substring(realUrl.indexOf("://"));
+    return realUrl;
+}
+
 function importPublishedFile() {
     var url = prompt("文档地址：");
     if (url == null) return;
     url = decodeURI(url.replace(/\ +/g, ""));
     $.ajax({
         type: "GET",
-        url: url.endsWith(".html") ? url : url + ".html",
+        url: getRealUrl(url),
         success: function (data) {
             var content = getRealContent(data);
             if (content == null) {
@@ -237,7 +243,7 @@ function publishFile() {
                     alert("发布成功！");
                     var url = publishBaseUrl + path;
                     $("#publishUrl").text(url).attr("href", url);
-                    setDocUrl(fileName, url);
+                    setDocUrl(nowDoc(), url);
                 }, function () {
                     alert("发布失败！");
                 });
@@ -249,7 +255,7 @@ function publishFile() {
                             alert("发布成功！");
                             var url = publishBaseUrl + path;
                             $("#publishUrl").text(url).attr("href", url);
-                            setDocUrl(fileName, url);
+                            setDocUrl(nowDoc(), url);
                         }, function () {
                             alert("发布失败！");
                         });
