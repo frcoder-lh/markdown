@@ -423,7 +423,7 @@ function githubUpdateFile(url, content, success, fail) {
  *
  */
 function out(inString) {
-    $("#out").contents().find("body").html(marked(inString));
+    $("#out").contents().find("body").html(marked(inString, {breaks: true}));
 }
 
 editor.getSession().on("change", function () {
