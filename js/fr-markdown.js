@@ -181,7 +181,7 @@ function saveFile() {
     var fileName = prompt("保存为：", nowDoc());
     if (fileName == null) return;
     fileName = fileName.replace(/\ +/g, "");
-    DownloadText(fileName + ".html", getOutContents());
+    DownloadText(fileName + ".html", clearPlaceholder(getOutContents()));
     editor.focus();
 }
 
@@ -346,6 +346,11 @@ function appendPassWord(password, success, fail) {
     }
 }
 
+function clearPlaceholder(content) {
+    content = content.replace("<!---css/fr-password.css---->", '');
+    content = content.replace("<!---js/fr-password.js---->", '');
+    return content;
+}
 
 function setUserName() {
     var username = prompt("请输入用户名：", localStorage.username);
