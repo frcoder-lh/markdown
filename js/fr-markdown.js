@@ -66,7 +66,7 @@ document.body.addEventListener("drop", function (e) {
     e.preventDefault();
     openFile(e.dataTransfer.files[0]);
 }, false);
-$("#save").click(function () {
+$("#download").click(function () {
     saveFile();
 });
 $("#import").click(function () {
@@ -77,6 +77,9 @@ $("#publish").click(function () {
 });
 $("#update").click(function () {
     updatePublishedFile();
+});
+$("#print").click(function () {
+    document.getElementById("out").contentWindow.print();
 });
 $("#settings").click(function () {
     setUserName();
