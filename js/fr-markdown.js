@@ -43,8 +43,7 @@ $("#new").click(function () {
     if (newDoc(docname, "")) {
         addSelect(docname);
         setSelect(docname);
-    }
-    else {
+    } else {
         alert("文档名：\"" + docname + "\"已被使用，请重新命名。");
     }
     editor.focus();
@@ -75,9 +74,6 @@ $("#import").click(function () {
 $("#publish").click(function () {
     publishFile();
 });
-$("#update").click(function () {
-    updatePublishedFile();
-});
 $("#print").click(function () {
     document.getElementById("out").contentWindow.print();
 });
@@ -103,8 +99,7 @@ function newDoc(name, content) {
         docnames.push(name);
         localStorage.docnames = docnames;
         return true;
-    }
-    else return false;
+    } else return false;
 }
 
 function saveDoc(name, content) {
@@ -135,6 +130,7 @@ function getDocNames() {
 }
 
 function setDocUrl(name, url) {
+    $("#publishUrl").text(url).attr("href", url);
     localStorage.setItem(setName(name) + "-url", url);
 }
 
@@ -219,7 +215,6 @@ function importPublishedFile() {
             if ($.trim(editor.getValue()) == '' || confirm("确认导入文档？当前内容将被覆盖!") == true) {
                 editor.setValue(content);
                 editor.focus();
-                $("#publishUrl").text(url).attr("href", url);
                 setDocUrl(nowDoc(), url);
             }
         },
@@ -237,70 +232,42 @@ function publishFile() {
         if (fileName == null) return;
         fileName = fileName.replace(/\ +/g, "");
         var path = getUserName() + "/" + fileName;
-        var content = getOutContents();
+
         var password = prompt("创建文档密码：");
-        if (password == null) return;
-        if ($.trim(password) == '') {
-            githubSaveFile(githubUrl + path + ".html", content,
-                function () {
-                    alert("发布成功！");
-                    var url = publishBaseUrl + path;
-                    $("#publishUrl").text(url).attr("href", url);
-                    setDocUrl(nowDoc(), url);
-                }, function () {
-                    alert("发布失败！");
-                });
-        } else {
-            appendPassWord(password,
-                function (content) {
-                    githubSaveFile(githubUrl + path + ".html", content,
-                        function () {
-                            alert("发布成功！");
-                            var url = publishBaseUrl + path;
-                            $("#publishUrl").text(url).attr("href", url);
-                            setDocUrl(nowDoc(), url);
-                        }, function () {
-                            alert("发布失败！");
-                        });
-                }, function () {
-                    alert("文档加密失败！");
-                });
-        }
+        appendPassWord(password, function (content) {
+
+            var realUrl = githubUrl + path;
+            if (!realUrl.endsWith(".html")) realUrl += ".html";
+
+            var showUrl = publishBaseUrl + path;
+
+            // 获取文档信息，探测文档是否存在
+            githubGetFileInfo(realUrl, function (data) {
+                if (confirm("文档已存在，是否覆盖!")) {
+                    saveOrUpdate(data.sha);
+                } else {
+                    setDocUrl(nowDoc(), showUrl);
+                }
+            }, function (e) {
+                if (e.status == 404) {
+                    saveOrUpdate();
+                }
+            });
+
+            function saveOrUpdate(sha) {
+                githubSaveFile(realUrl, sha, content,
+                    function () {
+                        alert("发布成功！");
+                        setDocUrl(nowDoc(), showUrl);
+                    }, function (e) {
+                        alert("发布失败！");
+                    });
+            }
+        }, function () {
+            alert("文档加密失败！");
+        });
     }
     editor.focus();
-}
-
-function updatePublishedFile() {
-    var url = getDocUrl(nowDoc());
-    if (!url) {
-        alert("请先发布文档！");
-        return;
-    }
-    url = githubUrl + url.slice(publishBaseUrl.length)
-    if (!url.endsWith(".html")) url += ".html";
-    var content = getOutContents();
-    var password = prompt("创建文档密码：");
-    if (password == null) return;
-    if ($.trim(password) == '') {
-        githubUpdateFile(url, content,
-            function () {
-                alert("更新成功！");
-            }, function () {
-                alert("更新失败，请稍后重试！");
-            });
-    } else {
-        appendPassWord(password,
-            function (content) {
-                githubUpdateFile(url, content,
-                    function () {
-                        alert("更新成功！");
-                    }, function () {
-                        alert("更新失败，请稍后重试！");
-                    });
-            }, function () {
-                alert("文档加密失败！");
-            });
-    }
 }
 
 function switchEncode() {
@@ -312,6 +279,13 @@ function getOutContents() {
 }
 
 function appendPassWord(password, success, fail) {
+
+    // 在输入密码时，选择取消或者选择确认时密码为空，都表示不加密码
+    if (password == null || $.trim(password) == '') {
+        success(getOutContents());
+        return;
+    }
+
     var times = 0, files = ["out.html", "js/fr-password.js", "css/fr-password.css"], datas = {};
     files.forEach(function (file) {
         $.ajax({
@@ -331,7 +305,7 @@ function appendPassWord(password, success, fail) {
         times++;
         if (times === files.length) {
             if (datas["out.html"] == undefined || datas["css/fr-password.css"] == undefined || datas["js/fr-password.js"] == undefined) {
-                fail()
+                fail();
             } else {
                 complete();
             }
@@ -345,7 +319,7 @@ function appendPassWord(password, success, fail) {
         content = content.replace("@password@", password);
         content = content.replace("@content@", $("#out").contents().find("body").html());
         content = setRealContent(editor.getValue(), content);
-        success(content)
+        success(content);
     }
 }
 
@@ -382,14 +356,19 @@ function githubGetFileInfo(url, success, fail) {
     });
 }
 
-function githubSaveFile(url, content, success, fail) {
+function githubSaveFile(url, sha, content, success, fail) {
     $.ajax({
         type: "PUT",
         url: url,
         headers: {
             "Authorization": "token " + getGithubToken()
         },
-        data: JSON.stringify({
+        data: JSON.stringify(sha ? {
+            "branch": gitBranch,
+            "message": "update",
+            "sha": sha,
+            "content": Base64Encode(content)
+        } : {
             "branch": gitBranch,
             "message": "save",
             "content": Base64Encode(content)
@@ -399,31 +378,6 @@ function githubSaveFile(url, content, success, fail) {
         success: success,
         error: fail
     });
-}
-
-function githubUpdateFile(url, content, success, fail) {
-    githubGetFileInfo(url, function (data) {
-        $.ajax({
-            type: "PUT",
-            url: url,
-            headers: {
-                "Authorization": "token " + getGithubToken()
-            },
-            data: JSON.stringify({
-                "branch": gitBranch,
-                "message": "update",
-                "sha": data.sha,
-                "content": Base64Encode(content)
-            }),
-            dataType: 'json',
-            ContentType: "application/json",
-            success: success,
-            error: fail
-        });
-    }, function () {
-        alert("更新失败：文件不存在，请重新发布！");
-    })
-
 }
 
 /**
@@ -585,8 +539,7 @@ function GB2312UTF8() {
             if (n1 >= n2) {
                 s += '1';
                 n1 = n1 - n2;
-            }
-            else
+            } else
                 s += '0';
         }
         return s;
@@ -617,8 +570,7 @@ function GB2312UTF8() {
                 if (sa[i].length) {
                     retV += sa[i].substring(5);
                 }
-            }
-            else {
+            } else {
                 retV += unescape("%" + sa[i]);
                 if (sa[i].length) {
                     retV += sa[i].substring(5);
@@ -645,15 +597,13 @@ function GB2312UTF8() {
                 str1 = str1.substr(2, str1.length - 2);
                 if (parseInt("0x" + a) & 0x80 == 0) {
                     substr = substr + String.fromCharCode(parseInt("0x" + a));
-                }
-                else if (parseInt("0x" + a) & 0xE0 == 0xC0) { //two byte
+                } else if (parseInt("0x" + a) & 0xE0 == 0xC0) { //two byte
                     b = str1.substr(1, 2);
                     str1 = str1.substr(3, str1.length - 3);
                     var widechar = (parseInt("0x" + a) & 0x1F) << 6;
                     widechar = widechar | (parseInt("0x" + b) & 0x3F);
                     substr = substr + String.fromCharCode(widechar);
-                }
-                else {
+                } else {
                     b = str1.substr(1, 2);
                     str1 = str1.substr(3, str1.length - 3);
                     c = str1.substr(1, 2);
@@ -663,8 +613,7 @@ function GB2312UTF8() {
                     widechar = widechar | (parseInt("0x" + c) & 0x3F);
                     substr = substr + String.fromCharCode(widechar);
                 }
-            }
-            else {
+            } else {
                 substr = substr + str1.substring(0, i);
                 str1 = str1.substring(i);
             }
@@ -683,8 +632,7 @@ function DownloadText(filename, content) {
         aLink.download = filename;
         aLink.href = URL.createObjectURL(blob);
         aLink.click();
-    }
-    else//IE
+    } else//IE
     {
         var Folder = BrowseFolder();
         var fso, tf;
@@ -711,8 +659,7 @@ function BrowseFolder() {//使用ActiveX控件，选择保存目录
             //document.all.savePath.value=Folder;
             return Folder;
         }
-    }
-    catch (e) {
+    } catch (e) {
         alert(e.message);
     }
 }
