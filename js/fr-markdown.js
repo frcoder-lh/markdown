@@ -18,14 +18,20 @@ var gitBranch = "gh-pages";
  * 编辑器
  *
  */
+ace.require("ace/ext/language_tools");
 editor = ace.edit("in");
 editor.focus();
 editor.setFontSize(12);
 editor.setReadOnly(false);
-editor.setOption("wrap", "free")
+editor.setOption("wrap", "free");
 editor.setShowPrintMargin(false);
-editor.$blockScrolling = Infinity
-ace.require("ace/ext/language_tools");
+editor.$blockScrolling = Infinity;
+editor.setOptions({
+    enableBasicAutocompletion: true,
+    enableSnippets: true,
+    enableLiveAutocompletion: true
+});
+
 
 /**
  * 菜单栏
