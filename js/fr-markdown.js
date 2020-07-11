@@ -484,6 +484,17 @@ function initBind() {
             alert('地址已复制到剪切板！');
         }
     });
+
+
+    //监听ctrl+p打印
+    function listenCtrlP(e) {
+        if (e.keyCode == 80 && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
+            e.preventDefault();
+            $("#print").click();
+        }
+    };
+    document.addEventListener('keydown', listenCtrlP);
+    document.getElementById("out").contentWindow.addEventListener('keydown', listenCtrlP);
 }
 
 function initDrag() {
