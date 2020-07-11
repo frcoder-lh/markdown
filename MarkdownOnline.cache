@@ -13,6 +13,7 @@ CACHE:
     js/jquery-3.2.0.min.js
     js/marked.min.js
     js/clipboard.min.js
+    js/highlight.pack.js
 
 NETWORK:
     *

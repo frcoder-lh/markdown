@@ -391,7 +391,16 @@ function githubSaveFile(url, sha, content, success, fail) {
  *
  */
 function out(inString) {
-    $("#out").contents().find("body").html(marked(inString, {breaks: true}));
+    $("#out").contents().find("body").html(marked(inString,
+        {
+            breaks: true,
+            highlight: function (code, lang) {
+                if (lang == undefined || !hljs.listLanguages().includes(lang)) {
+                    return hljs.highlightAuto(code).value;
+                }
+                return hljs.highlight(lang, code).value;
+            }
+        }));
 }
 
 editor.getSession().on("change", function () {
