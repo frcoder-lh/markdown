@@ -9,9 +9,9 @@ var publishBaseUrl = "http://book.littletools.ml/";
 
 var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var githubUrl = "https://api.github.com/repos/little-tools/md/contents/";
-var githubToken1 = "110d32214";
-var githubToken3 = "e2ca7e72c9cb857d";
-var githubToken2 = "d8c4bf66109ef69";
+var githubToken1 = "ghp_JnMDQD9KD";
+var githubToken3 = "jcVpklD144ivK";
+var githubToken2 = "3bGIzKPmdCLTUB";
 var gitBranch = "gh-pages";
 
 /**
